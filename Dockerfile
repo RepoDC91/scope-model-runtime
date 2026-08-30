@@ -17,7 +17,6 @@ RUN ./node_modules/.bin/turbo run build --filter=editor
 # the store can create the database on first write.
 RUN mkdir -p /data && chown -R bun:bun /data /app
 ENV PASCAL_DATA_DIR=/data
-VOLUME /data
 
 USER bun
 EXPOSE 3000
