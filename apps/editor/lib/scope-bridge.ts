@@ -3,8 +3,12 @@
 import { useScene } from '@pascal-app/core'
 import { applySceneGraphToEditor, type SceneGraph } from '@pascal-app/editor'
 import { useEffect } from 'react'
-
-export const DEFAULT_SCOPE_ORIGIN = 'https://model.scope.cloud'
+import {
+  DEFAULT_SCOPE_ORIGIN,
+  isAllowedTrustedScopeOrigin,
+  normalizeScopeOrigin,
+  resolveConfiguredTrustedScopeOrigin,
+} from './scope-origins'
 
 export type ScopeMessageType =
   | 'scope:init'
@@ -43,32 +47,11 @@ const EMPTY_SCOPE_CONTEXT: ScopeHostContext = {
 let currentScopeContext: ScopeHostContext = { ...EMPTY_SCOPE_CONTEXT }
 
 export function resolveTrustedScopeOrigin(explicitOrigin?: string | null): string {
-  const configured =
-    explicitOrigin ??
-    process.env.NEXT_PUBLIC_SCOPE_MODEL_ORIGIN ??
-    process.env.SCOPE_MODEL_ORIGIN ??
-    DEFAULT_SCOPE_ORIGIN
-
-  const trimmed = configured?.trim()
-  if (!trimmed) {
-    return DEFAULT_SCOPE_ORIGIN
-  }
-
-  try {
-    return new URL(trimmed).origin
-  } catch {
-    return trimmed.replace(/\/+$/, '')
-  }
+  return resolveConfiguredTrustedScopeOrigin(explicitOrigin)
 }
 
 export function isTrustedScopeOrigin(origin: string | null | undefined): boolean {
-  if (!origin) return false
-
-  try {
-    return new URL(origin).origin === resolveTrustedScopeOrigin()
-  } catch {
-    return false
-  }
+  return isAllowedTrustedScopeOrigin(origin)
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -237,14 +220,15 @@ export function useScopeBridge({
     if (typeof window === 'undefined') return
 
     const trustedOrigin = resolveTrustedScopeOrigin()
-    const sendReady = () => {
+    const sendReady = (targetOrigin = trustedOrigin) => {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'pascal:ready' }, trustedOrigin)
+        window.parent.postMessage({ type: 'pascal:ready' }, targetOrigin)
       }
     }
 
     const handleMessage = async (event: MessageEvent) => {
-      if (!isTrustedScopeOrigin(event.origin)) {
+      const targetOrigin = normalizeScopeOrigin(event.origin)
+      if (!targetOrigin || !isTrustedScopeOrigin(targetOrigin)) {
         return
       }
 
@@ -257,7 +241,7 @@ export function useScopeBridge({
 
       switch (parsed.type) {
         case 'scope:init': {
-          sendReady()
+          sendReady(targetOrigin)
           break
         }
         case 'scope:load': {
