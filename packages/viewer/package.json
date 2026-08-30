@@ -23,7 +23,7 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@pascal-app/core": "^1.0.0-beta.5",
+    "@pascal-app/core": "workspace:*",
     "@react-three/drei": "^10",
     "@react-three/fiber": "^9",
     "react": "^18 || ^19",
@@ -35,7 +35,7 @@
     "zustand": "^5"
   },
   "devDependencies": {
-    "@pascal-app/core": "^1.0.0-beta.5",
+    "@pascal-app/core": "workspace:*",
     "@pascal/typescript-config": "*",
     "@types/node": "^22",
     "@types/react": "^19.2.2",

@@ -4,6 +4,9 @@ import type { NextConfig } from 'next'
 
 const appDirectory = path.dirname(fileURLToPath(import.meta.url))
 const portableBuild = process.env.PASCAL_PORTABLE_BUILD === '1'
+const trustedScopeOrigin =
+  process.env.NEXT_PUBLIC_SCOPE_MODEL_ORIGIN ?? process.env.SCOPE_MODEL_ORIGIN ?? 'https://model.scope.cloud'
+const frameAncestors = `'self' ${trustedScopeOrigin}`
 
 const nextConfig: NextConfig = {
   ...(portableBuild
@@ -11,6 +14,19 @@ const nextConfig: NextConfig = {
     : {}),
   logging: {
     browserToTerminal: true,
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: `frame-ancestors ${frameAncestors}`,
+          },
+        ],
+      },
+    ]
   },
   typescript: {
     ignoreBuildErrors: true,

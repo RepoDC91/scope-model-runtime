@@ -4,11 +4,13 @@ import { Editor, ItemsPanel } from '@pascal-app/editor'
 import { Hammer, Layers, Package, Settings } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useCallback } from 'react'
 import { BuildTab } from '@/components/build-tab'
 import {
   CommunityViewerToolbarLeft,
   CommunityViewerToolbarRight,
 } from '@/components/viewer-toolbar'
+import { ScopeBridgeMount, resolveTrustedScopeOrigin } from '@/lib/scope-bridge'
 
 // The open-source editor only ships the built-in catalog (no uploaded items),
 // so the Library/Community/Mine source chips and tag filters add nothing —
@@ -87,8 +89,39 @@ const SIDEBAR_TABS = [
 const PROJECT_ID = 'local-editor'
 
 export default function Home() {
+  const trustedOrigin = resolveTrustedScopeOrigin()
+
+  const handleDirty = useCallback(() => {
+    if (typeof window === 'undefined' || window === window.parent) return
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'pascal:dirty' }, trustedOrigin)
+    }
+  }, [trustedOrigin])
+
+  const handleSaveStatus = useCallback(
+    (status: string) => {
+      if (typeof window === 'undefined' || window === window.parent) return
+      if (status === 'saved') {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'pascal:saved' }, trustedOrigin)
+        }
+      } else if (status === 'error') {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'pascal:error' }, trustedOrigin)
+        }
+      }
+    },
+    [trustedOrigin],
+  )
+
   return (
     <div className="relative h-screen w-screen">
+      <ScopeBridgeMount
+        onDirty={handleDirty}
+        onLoadScene={async () => null}
+        onSaveScene={async () => {}}
+        onSaveStatusChange={handleSaveStatus}
+      />
       {PROJECT_ID === 'local-editor' && (
         <div className="pointer-events-none absolute top-14 left-1/2 z-40 -translate-x-1/2">
           <div className="pointer-events-none flex max-w-[min(92vw,42rem)] flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full border border-border/60 bg-background/90 px-4 py-1.5 text-xs shadow-sm backdrop-blur">
@@ -106,6 +139,8 @@ export default function Home() {
       )}
       <Editor
         layoutVersion="v2"
+        onDirty={handleDirty}
+        onSaveStatusChange={handleSaveStatus}
         projectId={PROJECT_ID}
         sidebarTabs={SIDEBAR_TABS}
         viewerToolbarLeft={<CommunityViewerToolbarLeft />}

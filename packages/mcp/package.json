@@ -55,7 +55,7 @@
     "prepublishOnly": "bun run build && bun test"
   },
   "peerDependencies": {
-    "@pascal-app/core": "^1.0.0-beta.5"
+    "@pascal-app/core": "workspace:*"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -63,7 +63,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@pascal-app/core": "^1.0.0-beta.5",
+    "@pascal-app/core": "workspace:*",
     "@pascal/typescript-config": "*",
     "@types/node": "^22.19.20",
     "typescript": "6.0.3"

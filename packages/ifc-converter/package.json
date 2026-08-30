@@ -23,7 +23,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@pascal-app/core": "*",
+    "@pascal-app/core": "workspace:*",
     "nanoid": "^5.1.6",
     "web-ifc": "^0.0.77"
   },
