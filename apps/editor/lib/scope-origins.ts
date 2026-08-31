@@ -5,7 +5,7 @@ export const TRUSTED_SCOPE_ORIGINS = [
 
 export const FRAME_ANCESTOR_ORIGINS = [
   ...TRUSTED_SCOPE_ORIGINS,
-  'https://base44.com',
+  'https://app.base44.com',
 ] as const
 
 export const DEFAULT_SCOPE_ORIGIN = TRUSTED_SCOPE_ORIGINS[0]
