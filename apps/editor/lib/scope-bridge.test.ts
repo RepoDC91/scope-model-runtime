@@ -18,6 +18,7 @@ describe('trusted Scope origin', () => {
       'https://model.scope.cloud',
       'https://scope-master-copy-ce3dd2cb.base44.app',
       'https://app.base44.com',
+      'https://preview-sandbox--6a940df76067c2b7ce3dd2cb.base44.app',
     ])
     expect(DEFAULT_SCOPE_ORIGIN).toBe('https://model.scope.cloud')
     expect(resolveConfiguredTrustedScopeOrigin()).toBe('https://model.scope.cloud')
@@ -30,6 +31,7 @@ describe('trusted Scope origin', () => {
     expect(isAllowedTrustedScopeOrigin('https://model.scope.cloud')).toBe(true)
     expect(isAllowedTrustedScopeOrigin('https://scope-master-copy-ce3dd2cb.base44.app')).toBe(true)
     expect(isAllowedTrustedScopeOrigin('https://app.base44.com')).toBe(false)
+    expect(isAllowedTrustedScopeOrigin('https://preview-sandbox--6a940df76067c2b7ce3dd2cb.base44.app')).toBe(false)
     expect(isAllowedTrustedScopeOrigin('https://evil.example')).toBe(false)
     expect(isAllowedTrustedScopeOrigin('https://scope-master-copy-ce3dd2cb.base44.app.evil')).toBe(false)
     expect(isAllowedTrustedScopeOrigin('https://random.base44.app')).toBe(false)

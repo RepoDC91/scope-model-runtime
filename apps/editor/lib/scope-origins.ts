@@ -6,6 +6,7 @@ export const TRUSTED_SCOPE_ORIGINS = [
 export const FRAME_ANCESTOR_ORIGINS = [
   ...TRUSTED_SCOPE_ORIGINS,
   'https://app.base44.com',
+  'https://preview-sandbox--6a940df76067c2b7ce3dd2cb.base44.app',
 ] as const
 
 export const DEFAULT_SCOPE_ORIGIN = TRUSTED_SCOPE_ORIGINS[0]
