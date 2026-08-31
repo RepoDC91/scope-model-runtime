@@ -3,6 +3,11 @@ export const TRUSTED_SCOPE_ORIGINS = [
   'https://scope-master-copy-ce3dd2cb.base44.app',
 ] as const
 
+export const FRAME_ANCESTOR_ORIGINS = [
+  ...TRUSTED_SCOPE_ORIGINS,
+  'https://base44.com',
+] as const
+
 export const DEFAULT_SCOPE_ORIGIN = TRUSTED_SCOPE_ORIGINS[0]
 
 export function normalizeScopeOrigin(origin?: string | null): string | null {

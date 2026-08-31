@@ -1,11 +1,11 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { NextConfig } from 'next'
-import { TRUSTED_SCOPE_ORIGINS } from './lib/scope-origins'
+import { FRAME_ANCESTOR_ORIGINS } from './lib/scope-origins'
 
 const appDirectory = path.dirname(fileURLToPath(import.meta.url))
 const portableBuild = process.env.PASCAL_PORTABLE_BUILD === '1'
-const frameAncestors = `'self' ${TRUSTED_SCOPE_ORIGINS.join(' ')}`
+const frameAncestors = `'self' ${FRAME_ANCESTOR_ORIGINS.join(' ')}`
 
 const nextConfig: NextConfig = {
   ...(portableBuild
