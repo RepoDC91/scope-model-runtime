@@ -7,6 +7,7 @@ import {
   postToTrustedScopeParents,
   resolveConfiguredTrustedScopeOrigin,
 } from './scope-origins'
+import { isScopeStartupEvent } from './scope-bridge'
 
 describe('trusted Scope origin', () => {
   test('allows only the approved production and live Base44 preview origins', () => {
@@ -63,5 +64,13 @@ describe('trusted Scope origin', () => {
     ])
     expect(calls.every(({ targetOrigin }) => targetOrigin !== '*')).toBe(true)
     expect(calls.some(({ targetOrigin }) => targetOrigin === 'https://evil.example')).toBe(false)
+  })
+
+  test('treats initial scope init/project messages as startup, not save errors', () => {
+    expect(isScopeStartupEvent({ type: 'scope:init' })).toBe(true)
+    expect(isScopeStartupEvent({ type: 'scope:project', payload: { projectId: null } })).toBe(true)
+    expect(isScopeStartupEvent({ type: 'scope:user', payload: { user: { id: 'u1' } } })).toBe(false)
+    expect(isScopeStartupEvent({ type: 'scope:load' })).toBe(false)
+    expect(isScopeStartupEvent({ type: 'scope:save' })).toBe(false)
   })
 })

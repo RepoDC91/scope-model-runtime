@@ -143,6 +143,11 @@ export type ScopeMessageEnvelope = {
   payload: Record<string, unknown>
 }
 
+export function isScopeStartupEvent(data: unknown): boolean {
+  if (!isRecord(data)) return false
+  return data.type === 'scope:init' || data.type === 'scope:project'
+}
+
 export function parseScopeMessage(data: unknown): ScopeMessageEnvelope | null {
   if (!isRecord(data)) return null
 
@@ -306,25 +311,20 @@ export function ScopeBridgeMount({
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const trustedOrigin = resolveTrustedScopeOrigin()
-
-    const onChange = () => {
-      onDirty?.()
-      if (typeof onSaveStatusChange !== 'function') return
-      const status = getScopeHostContext().projectId ? 'saved' : 'error'
-      onSaveStatusChange(status)
-    }
 
     const handleMessage = (event: MessageEvent) => {
       if (!isTrustedScopeOrigin(event.origin)) return
-      if (event.data?.type === 'scope:init' || event.data?.type === 'scope:project') {
-        onChange()
+      if (isScopeStartupEvent(event.data)) {
+        return
+      }
+      if (event.data?.type === 'scope:user') {
+        onDirty?.()
       }
     }
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [onDirty, onSaveStatusChange])
+  }, [onDirty])
 
   return null
 }
