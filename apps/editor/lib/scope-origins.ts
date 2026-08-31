@@ -44,3 +44,16 @@ export function isAllowedTrustedScopeOrigin(origin?: string | null): boolean {
 
   return TRUSTED_SCOPE_ORIGINS.includes(normalized as (typeof TRUSTED_SCOPE_ORIGINS)[number])
 }
+
+export function postToTrustedScopeParents(
+  message: Record<string, unknown>,
+  parent?: Pick<Window, 'postMessage'>,
+): void {
+  const targetParent = parent ?? (typeof window !== 'undefined' ? window.parent : undefined)
+
+  if (!targetParent || (typeof window !== 'undefined' && targetParent === window)) return
+
+  for (const origin of TRUSTED_SCOPE_ORIGINS) {
+    targetParent.postMessage(message, origin)
+  }
+}

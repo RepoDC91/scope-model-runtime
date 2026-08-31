@@ -4,9 +4,9 @@ import { useScene } from '@pascal-app/core'
 import { applySceneGraphToEditor, type SceneGraph } from '@pascal-app/editor'
 import { useEffect } from 'react'
 import {
-  DEFAULT_SCOPE_ORIGIN,
   isAllowedTrustedScopeOrigin,
   normalizeScopeOrigin,
+  postToTrustedScopeParents,
   resolveConfiguredTrustedScopeOrigin,
 } from './scope-origins'
 
@@ -219,10 +219,9 @@ export function useScopeBridge({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const trustedOrigin = resolveTrustedScopeOrigin()
-    const sendReady = (targetOrigin = trustedOrigin) => {
+    const sendReady = () => {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'pascal:ready' }, targetOrigin)
+        postToTrustedScopeParents({ type: 'pascal:ready' }, window.parent)
       }
     }
 
@@ -241,7 +240,7 @@ export function useScopeBridge({
 
       switch (parsed.type) {
         case 'scope:init': {
-          sendReady(targetOrigin)
+          sendReady()
           break
         }
         case 'scope:load': {

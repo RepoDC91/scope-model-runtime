@@ -10,7 +10,8 @@ import {
   CommunityViewerToolbarLeft,
   CommunityViewerToolbarRight,
 } from '@/components/viewer-toolbar'
-import { ScopeBridgeMount, resolveTrustedScopeOrigin } from '@/lib/scope-bridge'
+import { ScopeBridgeMount } from '@/lib/scope-bridge'
+import { postToTrustedScopeParents } from '@/lib/scope-origins'
 
 // The open-source editor only ships the built-in catalog (no uploaded items),
 // so the Library/Community/Mine source chips and tag filters add nothing —
@@ -89,30 +90,23 @@ const SIDEBAR_TABS = [
 const PROJECT_ID = 'local-editor'
 
 export default function Home() {
-  const trustedOrigin = resolveTrustedScopeOrigin()
-
   const handleDirty = useCallback(() => {
     if (typeof window === 'undefined' || window === window.parent) return
     if (window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: 'pascal:dirty' }, trustedOrigin)
+      postToTrustedScopeParents({ type: 'pascal:dirty' }, window.parent)
     }
-  }, [trustedOrigin])
+  }, [])
 
-  const handleSaveStatus = useCallback(
-    (status: string) => {
-      if (typeof window === 'undefined' || window === window.parent) return
+  const handleSaveStatus = useCallback((status: string) => {
+    if (typeof window === 'undefined' || window === window.parent) return
+    if (window.parent && window.parent !== window) {
       if (status === 'saved') {
-        if (window.parent && window.parent !== window) {
-          window.parent.postMessage({ type: 'pascal:saved' }, trustedOrigin)
-        }
+        postToTrustedScopeParents({ type: 'pascal:saved' }, window.parent)
       } else if (status === 'error') {
-        if (window.parent && window.parent !== window) {
-          window.parent.postMessage({ type: 'pascal:error' }, trustedOrigin)
-        }
+        postToTrustedScopeParents({ type: 'pascal:error' }, window.parent)
       }
-    },
-    [trustedOrigin],
-  )
+    }
+  }, [])
 
   return (
     <div className="relative h-screen w-screen">
