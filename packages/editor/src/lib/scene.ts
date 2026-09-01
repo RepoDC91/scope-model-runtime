@@ -281,9 +281,14 @@ export function syncEditorSelectionFromCurrentScene() {
   if (firstBuilding && firstLevel) {
     const isEmptyLevel = !firstLevel.children || firstLevel.children.length === 0
 
-    // For empty projects (new/blank), always start in structure/build/wall
-    // regardless of persisted state from a previous project
+    // For empty projects (new/blank), default to the build tool only when the
+    // editor has no valid tool selection already. A scene/context rehydrate must
+    // preserve the user's current left-panel choice rather than forcing wall.
     if (isEmptyLevel) {
+      const editorState = useEditor.getState()
+      const preservedTool =
+        editorState.mode === 'build' && editorState.tool ? editorState.tool : 'wall'
+
       useViewer.getState().setSelection({
         buildingId: firstBuilding.id,
         levelId: firstLevel.id,
@@ -293,7 +298,7 @@ export function syncEditorSelectionFromCurrentScene() {
       useEditor.getState().setPhase('structure')
       useEditor.getState().setStructureLayer('elements')
       useEditor.getState().setMode('build')
-      useEditor.getState().setTool('wall')
+      useEditor.getState().setTool(preservedTool)
       return
     }
 
