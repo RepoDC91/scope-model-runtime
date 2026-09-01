@@ -1,5 +1,6 @@
 export const TRUSTED_SCOPE_ORIGINS = [
   'https://model.scope.cloud',
+  'https://scope-master-copy-ce3dd2cb.base44.app',
   'https://preview--scope-master-copy--ce3dd2cb.base44.app',
 ] as const
 
