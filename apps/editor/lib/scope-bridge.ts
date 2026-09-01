@@ -1,7 +1,7 @@
 'use client'
 
 import { useScene } from '@pascal-app/core'
-import { applySceneGraphToEditor, type SceneGraph } from '@pascal-app/editor'
+import { applySceneGraphToEditor, type SceneGraph, useInteractionScope } from '@pascal-app/editor'
 import { useEffect } from 'react'
 import {
   isAllowedTrustedScopeOrigin,
@@ -214,6 +214,10 @@ function safeLoadScene(): SceneGraph | null {
   return stored
 }
 
+export function shouldDeferSceneRehydrate(): boolean {
+  return useInteractionScope.getState().scope.kind !== 'idle'
+}
+
 export function useScopeBridge({
   onLoadScene,
   onSaveScene,
@@ -249,6 +253,10 @@ export function useScopeBridge({
           break
         }
         case 'scope:load': {
+          if (shouldDeferSceneRehydrate()) {
+            return
+          }
+
           const payloadScene = parsed.payload.scene
           const nextScene = isSceneGraphShape(payloadScene)
             ? payloadScene

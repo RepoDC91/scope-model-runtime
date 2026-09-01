@@ -1,3 +1,4 @@
+import { useInteractionScope } from '@pascal-app/editor'
 import { describe, expect, test } from 'bun:test'
 import {
   DEFAULT_SCOPE_ORIGIN,
@@ -7,7 +8,7 @@ import {
   postToTrustedScopeParents,
   resolveConfiguredTrustedScopeOrigin,
 } from './scope-origins'
-import { isScopeStartupEvent } from './scope-bridge'
+import { isScopeStartupEvent, shouldDeferSceneRehydrate } from './scope-bridge'
 
 describe('trusted Scope origin', () => {
   test('allows only the approved production and live Base44 preview origins', () => {
@@ -84,5 +85,16 @@ describe('trusted Scope origin', () => {
     expect(isScopeStartupEvent({ type: 'scope:user', payload: { user: { id: 'u1' } } })).toBe(false)
     expect(isScopeStartupEvent({ type: 'scope:load' })).toBe(false)
     expect(isScopeStartupEvent({ type: 'scope:save' })).toBe(false)
+  })
+
+  test('defers bridge scene rehydrate while a drafting interaction is active', () => {
+    useInteractionScope.getState().end()
+    expect(shouldDeferSceneRehydrate()).toBe(false)
+
+    useInteractionScope.getState().begin({ kind: 'drafting', tool: 'wall' })
+    expect(shouldDeferSceneRehydrate()).toBe(true)
+
+    useInteractionScope.getState().end()
+    expect(shouldDeferSceneRehydrate()).toBe(false)
   })
 })
